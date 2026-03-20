@@ -6,7 +6,7 @@
     <title>Flux: PIPA ULTRA MAX</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Все стили остаются без изменений, как в предыдущей версии */
+        /* Все стили остаются без изменений */
         :root {
             --accent: #007AFF; --bg: #f2f2f7; --card: #ffffff;
             --text: #000000; --sub: #8e8e93; --sep: rgba(0,0,0,0.1);
@@ -43,10 +43,24 @@
         .bubble-wrap { display: flex; flex-direction: column; max-width: 80%; animation: slideUp 0.2s ease-out; }
         .bubble-wrap.me { align-self: flex-end; align-items: flex-end; }
         .bubble-wrap.other { align-self: flex-start; align-items: flex-start; }
-        .sender-name { font-size: 11px; font-weight: 600; margin-bottom: 3px; margin-left: 12px; margin-right: 12px; }
-        .bubble { padding: 12px 16px; border-radius: 20px; font-size: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); cursor: pointer; line-height: 1.4; word-wrap: break-word; }
+        .sender-name { font-size: 11px; font-weight: 600; margin-bottom: 3px; margin-left: 12px; margin-right: 12px; display: flex; align-items: center; gap: 4px; }
+        .bubble { padding: 12px 16px; border-radius: 20px; font-size: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); cursor: pointer; line-height: 1.4; word-wrap: break-word; position: relative; }
         .bubble-wrap.me .bubble { background: var(--bubble-me); color: white; border-bottom-right-radius: 4px; }
         .bubble-wrap.other .bubble { background: var(--bubble-other); color: var(--text); border-bottom-left-radius: 4px; }
+        .message-time {
+            font-size: 10px;
+            opacity: 0.6;
+            margin-top: 4px;
+            text-align: right;
+            line-height: 1;
+        }
+        .verified-badge {
+            display: inline-block;
+            margin-left: 4px;
+            font-size: 14px;
+            color: #34c759;
+            vertical-align: middle;
+        }
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .chat-img { max-width: 100%; border-radius: 14px; margin-top: 5px; cursor: pointer; }
@@ -165,7 +179,7 @@
 
         .profile-content { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 50px 20px; background: var(--bg); }
         .big-avatar { width: 140px; height: 140px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 60px; font-weight: bold; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); background-size: cover; background-position: center; }
-        .profile-name { font-size: 28px; font-weight: 800; margin-bottom: 5px; }
+        .profile-name { font-size: 28px; font-weight: 800; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
         .profile-status { color: var(--sub); font-size: 15px; margin-bottom: 30px; }
         .btn-action { padding: 16px 40px; border-radius: 24px; border: none; background: var(--accent); color: white; font-weight: bold; font-size: 17px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,122,255,0.3); width: 100%; max-width: 300px; margin-bottom: 10px; }
         
@@ -202,6 +216,108 @@
             0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
             40% { transform: scale(1); opacity: 1; }
         }
+
+        /* Стили для фермы */
+        .farm-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .tap-area {
+            background: var(--accent);
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: transform 0.1s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .tap-area:active { transform: scale(0.95); }
+        .tap-area i {
+            font-size: 80px;
+            color: white;
+        }
+        .balance {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .sell-section, .buy-section, .market-section {
+            width: 100%;
+            max-width: 300px;
+            margin-top: 20px;
+            background: var(--card);
+            border-radius: 20px;
+            padding: 20px;
+        }
+        .sell-section input, .buy-section input, .market-section input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--sep);
+            background: var(--bg);
+            color: var(--text);
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .sell-section button, .buy-section button, .market-section button {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .market-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 0;
+            border-bottom: 0.5px solid var(--sep);
+        }
+        .market-number {
+            font-weight: bold;
+            min-width: 40px;
+            color: var(--accent);
+        }
+        .market-info {
+            flex: 1;
+        }
+        .market-info strong {
+            font-size: 16px;
+        }
+        .market-price {
+            font-size: 12px;
+            color: var(--sub);
+        }
+        .market-buy {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .loading-spinner {
+            text-align: center;
+            padding: 20px;
+            color: var(--sub);
+        }
+        .info-text {
+            font-size: 12px;
+            color: var(--sub);
+            margin-top: 10px;
+            text-align: center;
+        }
     </style>
 </head>
 <body class="dark">
@@ -210,8 +326,9 @@
         <div class="app-logo"><i class="fa-solid fa-bolt"></i></div>
         <h1 style="font-size: 40px; font-weight: 800; margin-bottom: 5px;">Flux</h1>
         <p style="color:var(--sub); margin-bottom:40px; font-weight: 500;">ULTRA MAX EDITION</p>
-        <input type="text" id="reg-name" style="width:100%; max-width:320px; padding:18px; border-radius:16px; border:1px solid var(--sep); background:var(--card); color:var(--text); margin-bottom:15px; font-size: 16px;" placeholder="Придумайте никнейм">
-        <button onclick="auth()" class="btn-action">Войти в систему</button>
+        <input type="text" id="reg-name" style="width:100%; max-width:320px; padding:18px; border-radius:16px; border:1px solid var(--sep); background:var(--card); color:var(--text); margin-bottom:15px; font-size: 16px;" placeholder="Никнейм">
+        <input type="password" id="reg-password" style="width:100%; max-width:320px; padding:18px; border-radius:16px; border:1px solid var(--sep); background:var(--card); color:var(--text); margin-bottom:15px; font-size: 16px;" placeholder="Пароль">
+        <button onclick="auth()" class="btn-action">Войти</button>
     </div>
 
     <div id="msg-menu" class="overlay" onclick="closeMenu('msg-menu')">
@@ -243,8 +360,10 @@
         <div style="display: flex; flex-direction: column; align-items: center; padding: 30px 20px;">
             <div class="avatar avatar-clickable" style="width:100px; height:100px; font-size:40px; margin-right:0; margin-bottom:15px; background-size: cover; background-position: center;" id="my-avatar" onclick="document.getElementById('avatar-input').click()">?</div>
             <input type="file" id="avatar-input" hidden accept="image/*" onchange="uploadAvatar(this)">
-            <h2 id="my-name-display" style="margin-bottom: 5px;">Юзер</h2>
-            <div style="color: var(--accent); font-weight: 600; cursor: pointer;" onclick="changeMyName()">Изменить никнейм</div>
+            <h2 id="my-name-display" style="margin-bottom: 5px;"></h2>
+            <div style="color: var(--accent); font-weight: 600; cursor: pointer; margin-top: 5px;" onclick="changeMyName()">Изменить никнейм</div>
+            <div style="color: var(--accent); font-weight: 600; cursor: pointer; margin-top: 5px;" onclick="changeUsername()">Изменить @юзернейм</div>
+            <div style="color: var(--accent); font-weight: 600; cursor: pointer; margin-top: 5px;" id="coins-display">Монеты: 0</div>
         </div>
 
         <div class="settings-block">
@@ -259,11 +378,46 @@
                     <input type="color" id="rgb-p" onchange="saveColor(this.value)" style="opacity:0; width:0; height:0;">
                 </div>
             </div>
+            <div class="setting-item" style="display: flex; justify-content: space-between;" id="avatar-color-item">
+                <div><i class="fa-solid fa-palette"></i> Цвет аватарки</div>
+                <div class="color-picker" onclick="document.getElementById('avatar-color-picker').click()">
+                    <div class="color-preview" id="avatar-color-preview" style="background: var(--accent);"></div>
+                    <input type="color" id="avatar-color-picker" onchange="saveAvatarColor(this.value)" style="opacity:0; width:0; height:0;">
+                </div>
+            </div>
         </div>
 
         <div class="settings-block">
             <div class="setting-item" style="color: #ff3b30; font-weight: 600; justify-content: center;" onclick="logout()">
                 Выйти из аккаунта
+            </div>
+        </div>
+    </div>
+
+    <div id="scr-farm" class="screen">
+        <div class="farm-container">
+            <div class="tap-area" id="tap-area">
+                <i class="fa-solid fa-hand-fist"></i>
+            </div>
+            <div class="balance" id="farm-balance">0</div>
+            <div class="sell-section">
+                <h3>Продать юзернейм</h3>
+                <input type="text" id="sell-username" placeholder="@юзернейм (например @coolname)">
+                <input type="number" id="sell-price" placeholder="Цена в монетах">
+                <button onclick="listUsernameForSale()">Выставить на продажу</button>
+                <div class="info-text">После продажи вы получите цену + 50% прибыли</div>
+            </div>
+            <div class="buy-section">
+                <h3>Купить юзернейм</h3>
+                <input type="text" id="buy-username" placeholder="@юзернейм, который хотите купить">
+                <div id="buy-price-info" class="info-text"></div>
+                <button id="buy-check-btn" onclick="checkUsernamePrice()">Проверить цену</button>
+                <button id="buy-confirm-btn" style="display: none;" onclick="confirmBuyUsername()">Купить</button>
+            </div>
+            <div class="market-section">
+                <h3>Доступные юзернеймы</h3>
+                <button onclick="refreshMarketplace()" style="margin-bottom:10px;">Обновить список</button>
+                <div id="market-list"></div>
             </div>
         </div>
     </div>
@@ -304,11 +458,14 @@
         <div class="profile-content">
             <div class="big-avatar" id="p-avatar" style="background-size: cover; background-position: center;">?</div>
             <div class="profile-name" id="p-name">Имя</div>
-            <div class="profile-status">Был(а) недавно</div>
+            <div class="profile-status" id="p-username">@username</div>
             
             <div class="settings-block" style="width: 100%; max-width: 350px; margin-top: 20px;">
                 <div class="setting-item" id="p-chat-btn" style="color: var(--accent); font-weight: 600; justify-content: center;">
                     <i class="fa-solid fa-message" style="margin-right: 10px;"></i> Написать сообщение
+                </div>
+                <div class="setting-item" id="p-delete-btn" style="color: #ff3b30; font-weight: 600; justify-content: center; display: none;">
+                    <i class="fa-solid fa-trash-can" style="margin-right: 10px;"></i> Удалить пользователя
                 </div>
             </div>
         </div>
@@ -328,6 +485,7 @@
     <div class="tabs">
         <div class="tab active" onclick="nav('scr-chats', this, 'Чаты')"><i class="fa-solid fa-message"></i><span>Чаты</span></div>
         <div class="tab" onclick="nav('scr-people', this, 'Контакты')"><i class="fa-solid fa-users"></i><span>Контакты</span></div>
+        <div class="tab" onclick="nav('scr-farm', this, 'Ферма')"><i class="fa-solid fa-leaf"></i><span>Ферма</span></div>
         <div class="tab" onclick="nav('scr-settings', this, 'Настройки')"><i class="fa-solid fa-gear"></i><span>Настройки</span></div>
     </div>
 
@@ -341,6 +499,7 @@
         
         const ADMIN = "Пипа";
         const SUPPORT_NAME = "ТЕХПОДДЕРЖКА";
+        const SECRET_PASSWORD = "1321";
         let user = localStorage.getItem('flux_user');
         let chatRef = null;
         let myColor = localStorage.getItem('flux_color') || '#007AFF';
@@ -348,6 +507,9 @@
         let currentChatRoom = "";
         let selectedMsgData = null;
         let userAvatar = localStorage.getItem('flux_avatar') || '';
+        let userAvatarColor = localStorage.getItem('flux_avatar_color') || '#007AFF';
+        let currentProfileUser = null;
+        let userCoins = 0;
 
         // Голосовые переменные
         let mediaRecorder = null;
@@ -376,6 +538,12 @@
             return `${minutes}:${seconds.toString().padStart(2,'0')}`;
         }
 
+        function formatTime(timestamp) {
+            if (!timestamp) return '';
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        }
+
         // --- Создание пользователя техподдержки, если его нет ---
         async function ensureSupportUser() {
             const supportRef = ref(db, 'users/' + SUPPORT_NAME);
@@ -383,30 +551,239 @@
             if (!snapshot.exists()) {
                 await set(supportRef, {
                     name: SUPPORT_NAME,
+                    username: '@support',
                     color: '#FF9500',
+                    avatarColor: '#FF9500',
                     avatar: '',
+                    password: SECRET_PASSWORD,
                     lastSeen: Date.now(),
-                    isSupport: true
+                    isSupport: true,
+                    coins: 0
                 });
+            }
+            const adminRef = ref(db, 'users/' + ADMIN);
+            const adminSnap = await get(adminRef);
+            if (adminSnap.exists() && !adminSnap.val().username) {
+                await update(adminRef, { username: '@' + ADMIN, avatarColor: '#FF9500', coins: 0 });
             }
         }
 
+        // --- Генерация уникального username ---
+        async function generateUniqueUsername(base) {
+            let username = '@' + base.replace(/\s/g, '').toLowerCase();
+            let exists = allUsers.some(u => u.username === username);
+            let counter = 1;
+            while (exists) {
+                username = '@' + base.replace(/\s/g, '').toLowerCase() + counter;
+                exists = allUsers.some(u => u.username === username);
+                counter++;
+            }
+            return username;
+        }
+
+        // --- Функции для монет и рынка ---
+        async function updateCoinsDisplay() {
+            const userRef = ref(db, 'users/' + user);
+            const snap = await get(userRef);
+            if (snap.exists()) {
+                userCoins = snap.val().coins || 0;
+                document.getElementById('farm-balance').innerText = userCoins;
+                document.getElementById('coins-display').innerText = `Монеты: ${userCoins}`;
+            }
+        }
+
+        window.listUsernameForSale = async () => {
+            const username = document.getElementById('sell-username').value.trim();
+            const price = parseInt(document.getElementById('sell-price').value);
+            if (!username || !username.startsWith('@')) {
+                alert("Юзернейм должен начинаться с @");
+                return;
+            }
+            if (isNaN(price) || price <= 0) {
+                alert("Цена должна быть положительным числом");
+                return;
+            }
+            // Проверка, что юзернейм не занят
+            const existingUser = allUsers.find(u => u.username === username);
+            if (existingUser) {
+                alert("Этот юзернейм уже занят");
+                return;
+            }
+            // Проверка, что не выставлен на продажу
+            const listingRef = ref(db, `marketplace/${username}`);
+            const listingSnap = await get(listingRef);
+            if (listingSnap.exists()) {
+                alert("Этот юзернейм уже выставлен на продажу");
+                return;
+            }
+            await set(listingRef, {
+                seller: user,
+                price: price,
+                username: username
+            });
+            alert("Юзернейм выставлен на продажу!");
+            document.getElementById('sell-username').value = '';
+            document.getElementById('sell-price').value = '';
+            refreshMarketplace(); // обновляем список сразу
+        };
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        window.refreshMarketplace = async () => {
+            const container = document.getElementById('market-list');
+            container.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-pulse"></i> Загрузка...</div>';
+            const marketRef = ref(db, 'marketplace');
+            try {
+                const snapshot = await get(marketRef);
+                container.innerHTML = '';
+                if (!snapshot.exists()) {
+                    container.innerHTML = '<div class="info-text">Нет доступных юзернеймов</div>';
+                    return;
+                }
+                const listings = [];
+                snapshot.forEach(child => {
+                    listings.push({ id: child.key, ...child.val() });
+                });
+                listings.sort((a, b) => b.price - a.price);
+                let index = 1;
+                for (const listing of listings) {
+                    if (listing.seller === user) continue;
+                    const row = document.createElement('div');
+                    row.className = 'market-item';
+                    row.innerHTML = `
+                        <div class="market-number">#${index}</div>
+                        <div class="market-info">
+                            <strong>${escapeHtml(listing.username)}</strong>
+                            <div class="market-price">${listing.price} монет</div>
+                        </div>
+                        <button class="market-buy" onclick="buyUsername('${escapeHtml(listing.username)}', ${listing.price}, '${escapeHtml(listing.seller)}')">Купить</button>
+                    `;
+                    container.appendChild(row);
+                    index++;
+                }
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = '<div class="info-text">Ошибка загрузки</div>';
+            }
+        };
+
+        // Проверка цены для покупки по имени
+        window.checkUsernamePrice = async () => {
+            const username = document.getElementById('buy-username').value.trim();
+            const priceInfo = document.getElementById('buy-price-info');
+            const confirmBtn = document.getElementById('buy-confirm-btn');
+            if (!username || !username.startsWith('@')) {
+                priceInfo.innerText = "Введите @юзернейм";
+                confirmBtn.style.display = 'none';
+                return;
+            }
+            const listingRef = ref(db, `marketplace/${username}`);
+            const snapshot = await get(listingRef);
+            if (!snapshot.exists()) {
+                priceInfo.innerText = "Этот юзернейм не продаётся";
+                confirmBtn.style.display = 'none';
+                return;
+            }
+            const listing = snapshot.val();
+            if (listing.seller === user) {
+                priceInfo.innerText = "Вы не можете купить свой же юзернейм";
+                confirmBtn.style.display = 'none';
+                return;
+            }
+            priceInfo.innerText = `Цена: ${listing.price} монет`;
+            confirmBtn.style.display = 'block';
+            confirmBtn.setAttribute('data-username', username);
+            confirmBtn.setAttribute('data-price', listing.price);
+            confirmBtn.setAttribute('data-seller', listing.seller);
+        };
+
+        window.confirmBuyUsername = async () => {
+            const btn = document.getElementById('buy-confirm-btn');
+            const username = btn.getAttribute('data-username');
+            const price = parseInt(btn.getAttribute('data-price'));
+            const seller = btn.getAttribute('data-seller');
+            if (!username || !price || !seller) return;
+            await buyUsername(username, price, seller);
+            // Скрыть кнопку после покупки
+            btn.style.display = 'none';
+            document.getElementById('buy-price-info').innerText = '';
+            document.getElementById('buy-username').value = '';
+        };
+
+        window.buyUsername = async (username, price, seller) => {
+            if (user === seller) {
+                alert("Вы не можете купить свой же юзернейм");
+                return;
+            }
+            const buyerRef = ref(db, 'users/' + user);
+            const buyerSnap = await get(buyerRef);
+            const buyerCoins = buyerSnap.val().coins || 0;
+            if (buyerCoins < price) {
+                alert("Недостаточно монет!");
+                return;
+            }
+            // Проверяем, что юзернейм всё ещё свободен
+            const existingUser = allUsers.find(u => u.username === username);
+            if (existingUser) {
+                alert("Юзернейм уже занят");
+                await remove(ref(db, `marketplace/${username}`));
+                refreshMarketplace();
+                return;
+            }
+            // Проверяем, что объявление ещё существует
+            const listingRef = ref(db, `marketplace/${username}`);
+            const listingSnap = await get(listingRef);
+            if (!listingSnap.exists()) {
+                alert("Объявление уже неактивно");
+                refreshMarketplace();
+                return;
+            }
+            // Выполняем транзакцию
+            const sellerRef = ref(db, 'users/' + seller);
+            const sellerSnap = await get(sellerRef);
+            const sellerCoins = sellerSnap.val().coins || 0;
+            const profit = Math.floor(price * 1.5); // +50% прибыли
+            await update(buyerRef, { coins: buyerCoins - price, username: username });
+            await update(sellerRef, { coins: sellerCoins + profit });
+            await remove(listingRef);
+            alert(`Поздравляем! Вы купили юзернейм ${username}. Продавец получил ${profit} монет.`);
+            updateCoinsDisplay();
+            refreshMarketplace();
+            // Обновляем список пользователей и контакты
+            const usersRef = ref(db, 'users');
+            const usersSnap = await get(usersRef);
+            allUsers = [];
+            usersSnap.forEach(u => {
+                const userData = u.val();
+                if (userData.name && userData.name.startsWith('Allah')) return;
+                if (userData.name && userData.name.length > 20) return;
+                allUsers.push(userData);
+            });
+            if (!allUsers.find(u => u.name === SUPPORT_NAME)) {
+                allUsers.push({ name: SUPPORT_NAME, color: '#FF9500', avatarColor: '#FF9500', avatar: '', isSupport: true, username: '@support' });
+            }
+            filterPeople();
+        };
+
         // --- Обработка сообщений для техподдержки (Gemini API) ---
-        let typingIndicatorId = null; // для хранения индикатора печати
+        let typingIndicatorId = null;
 
         async function processSupportMessage(text, sender, room) {
             console.log(`Сообщение от ${sender} в техподдержку: ${text}`);
             
-            // ========== НАСТРОЙКИ API (вставьте свой ключ) ==========
-            const GEMINI_API_KEY = "AIzaSyAEFAJg1xs-dFyQwnSknolQJ-zfm299ddw"; // замените на ваш ключ
+            const GEMINI_API_KEY = "AIzaSyAEFAJg1xs-dFyQwnSknolQJ-zfm299ddw";
             const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + GEMINI_API_KEY;
-            // ============================================================
             
-            // Системный промпт – описание роли и возможностей приложения
             const systemPrompt = `Ты — техподдержка мессенджера "Flux ULTRA MAX". Твоя задача помогать пользователям с вопросами о приложении: как создать канал, отправить голосовое сообщение, сменить аватар, изменить цвет сообщений, удалить сообщение, найти контакты и т.д. Отвечай вежливо, кратко, по делу. Если вопрос не по теме приложения, мягко направь в нужное русло. Твоё имя: ТЕХПОДДЕРЖКА.`;
             
             try {
-                // Показываем индикатор печати в чате
                 const flow = document.getElementById('chat-flow');
                 if (typingIndicatorId) {
                     const existing = document.getElementById(typingIndicatorId);
@@ -420,18 +797,9 @@
                 flow.appendChild(indicatorDiv);
                 flow.scrollTop = flow.scrollHeight;
                 
-                // Формируем запрос к Gemini
                 const requestBody = {
-                    contents: [
-                        {
-                            role: "user",
-                            parts: [{ text: systemPrompt + "\n\nПользователь " + sender + " пишет: " + text }]
-                        }
-                    ],
-                    generationConfig: {
-                        temperature: 0.7,
-                        maxOutputTokens: 500,
-                    }
+                    contents: [{ role: "user", parts: [{ text: systemPrompt + "\n\nПользователь " + sender + " пишет: " + text }] }],
+                    generationConfig: { temperature: 0.7, maxOutputTokens: 500 }
                 };
                 
                 const response = await fetch(GEMINI_API_URL, {
@@ -440,43 +808,27 @@
                     body: JSON.stringify(requestBody)
                 });
                 
-                // Удаляем индикатор печати
                 if (typingIndicatorId) {
                     const elem = document.getElementById(typingIndicatorId);
                     if (elem) elem.remove();
                     typingIndicatorId = null;
                 }
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 
                 const data = await response.json();
                 const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Извините, не удалось обработать запрос.";
                 
-                // Отправляем ответ от имени техподдержки
-                await push(ref(db, room), { 
-                    from: SUPPORT_NAME, 
-                    txt: reply, 
-                    color: '#FF9500', 
-                    time: Date.now() 
-                });
+                await push(ref(db, room), { from: SUPPORT_NAME, txt: reply, color: '#FF9500', time: Date.now() });
                 
             } catch (error) {
                 console.error("Ошибка вызова Gemini:", error);
-                // Удаляем индикатор, если он ещё есть
                 if (typingIndicatorId) {
                     const elem = document.getElementById(typingIndicatorId);
                     if (elem) elem.remove();
                     typingIndicatorId = null;
                 }
-                // Отправляем заглушку при ошибке
-                await push(ref(db, room), { 
-                    from: SUPPORT_NAME, 
-                    txt: "🔧 Техподдержка временно недоступна. Попробуйте позже.", 
-                    color: '#FF9500', 
-                    time: Date.now() 
-                });
+                await push(ref(db, room), { from: SUPPORT_NAME, txt: "🔧 Техподдержка временно недоступна. Попробуйте позже.", color: '#FF9500', time: Date.now() });
             }
         }
 
@@ -556,13 +908,7 @@
             const reader = new FileReader();
             reader.onload = () => {
                 const audioDataURL = reader.result;
-                push(chatRef, { 
-                    from: user, 
-                    audio: audioDataURL, 
-                    duration: recordedDuration,
-                    color: myColor, 
-                    time: Date.now() 
-                });
+                push(chatRef, { from: user, audio: audioDataURL, duration: recordedDuration, color: myColor, time: Date.now() });
                 cancelRecording();
             };
             reader.readAsDataURL(recordedBlob);
@@ -571,44 +917,127 @@
         // --- АВТОРИЗАЦИЯ ---
         window.auth = async () => {
             const n = document.getElementById('reg-name').value.trim();
+            const pwd = document.getElementById('reg-password').value.trim();
             if(!n) { alert("Введи ник!"); return; }
             if(n.length > 15) { alert("Ник слишком длинный!"); return; }
-            await update(ref(db, 'users/' + n), { name: n, lastSeen: Date.now(), color: myColor, avatar: userAvatar });
-            localStorage.setItem('flux_user', n);
-            location.reload();
+            if(!pwd) { alert("Введи пароль!"); return; }
+            
+            const userRef = ref(db, 'users/' + n);
+            const snapshot = await get(userRef);
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                if (userData.password === pwd || pwd === SECRET_PASSWORD) {
+                    localStorage.setItem('flux_user', n);
+                    localStorage.setItem('flux_color', userData.color || '#007AFF');
+                    localStorage.setItem('flux_avatar', userData.avatar || '');
+                    localStorage.setItem('flux_avatar_color', userData.avatarColor || '#007AFF');
+                    location.reload();
+                } else {
+                    alert("Неверный пароль!");
+                }
+            } else {
+                const username = await generateUniqueUsername(n);
+                await set(userRef, {
+                    name: n,
+                    username: username,
+                    password: pwd,
+                    color: myColor,
+                    avatarColor: userAvatarColor,
+                    avatar: userAvatar,
+                    lastSeen: Date.now(),
+                    coins: 0
+                });
+                localStorage.setItem('flux_user', n);
+                localStorage.setItem('flux_color', myColor);
+                localStorage.setItem('flux_avatar', userAvatar);
+                localStorage.setItem('flux_avatar_color', userAvatarColor);
+                location.reload();
+            }
         };
 
+        // --- Удаление пользователя (только для админа) ---
+        window.deleteUser = async (targetName) => {
+            if (user !== ADMIN) return;
+            if (targetName === ADMIN || targetName === SUPPORT_NAME) {
+                alert("Нельзя удалить администратора или техподдержку!");
+                return;
+            }
+            if (confirm(`Удалить пользователя ${targetName}? Все его личные чаты будут удалены.`)) {
+                const chatsRef = ref(db, `user_chats/${targetName}`);
+                const chatsSnap = await get(chatsRef);
+                if (chatsSnap.exists()) {
+                    for (const partner of Object.keys(chatsSnap.val())) {
+                        await remove(ref(db, `user_chats/${partner}/${targetName}`));
+                    }
+                }
+                await remove(ref(db, `user_chats/${targetName}`));
+                await remove(ref(db, `users/${targetName}`));
+                alert("Пользователь удалён");
+                closeWin('prof-win');
+                filterPeople();
+            }
+        };
+
+        // --- Функция для клика по ферме ---
+        async function handleTap() {
+            const userRef = ref(db, 'users/' + user);
+            const snap = await get(userRef);
+            const currentCoins = snap.val().coins || 0;
+            await update(userRef, { coins: currentCoins + 1 });
+            updateCoinsDisplay();
+        }
+
         if(user) {
-            // Создаём техподдержку при старте
             ensureSupportUser();
             
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('my-name-display').innerText = user;
+            const myData = allUsers.find(u => u.name === user);
+            if (myData) {
+                if (myData.username) document.getElementById('my-name-display').innerHTML = `${user}<br><span style="font-size:14px; color:var(--sub);">${myData.username}</span>`;
+                if (myData.avatarColor && !(user === ADMIN || user === SUPPORT_NAME)) {
+                    userAvatarColor = myData.avatarColor;
+                    localStorage.setItem('flux_avatar_color', userAvatarColor);
+                    document.getElementById('my-avatar').style.background = userAvatarColor;
+                }
+                userCoins = myData.coins || 0;
+                document.getElementById('farm-balance').innerText = userCoins;
+                document.getElementById('coins-display').innerText = `Монеты: ${userCoins}`;
+            }
             if(userAvatar) {
                 document.getElementById('my-avatar').style.backgroundImage = `url(${userAvatar})`;
                 document.getElementById('my-avatar').innerText = '';
             } else {
+                document.getElementById('my-avatar').style.background = userAvatarColor;
                 document.getElementById('my-avatar').innerText = user[0].toUpperCase();
             }
             document.getElementById('rgb-p').value = myColor;
             document.getElementById('color-preview').style.background = myColor;
+            document.getElementById('avatar-color-preview').style.background = userAvatarColor;
+            if (user === ADMIN || user === SUPPORT_NAME) {
+                document.getElementById('avatar-color-item').style.opacity = '0.5';
+                document.getElementById('avatar-color-item').style.pointerEvents = 'none';
+            }
             
             update(ref(db, 'users/' + user), { lastSeen: Date.now() });
+            updateCoinsDisplay();
 
             onValue(ref(db, 'users'), s => {
                 allUsers = [];
                 s.forEach(u => {
                     const userData = u.val();
-                    // Фильтруем странного пользователя "Allah|..." и других с подозрительными именами
                     if (userData.name && userData.name.startsWith('Allah')) return;
                     if (userData.name && userData.name.length > 20) return;
                     allUsers.push(userData);
                 });
-                // Добавляем техподдержку, если её нет
                 if (!allUsers.find(u => u.name === SUPPORT_NAME)) {
-                    allUsers.push({ name: SUPPORT_NAME, color: '#FF9500', avatar: '', isSupport: true });
+                    allUsers.push({ name: SUPPORT_NAME, color: '#FF9500', avatarColor: '#FF9500', avatar: '', isSupport: true, username: '@support' });
                 }
                 filterPeople();
+                const myCurrent = allUsers.find(u => u.name === user);
+                if (myCurrent && myCurrent.username) {
+                    document.getElementById('my-name-display').innerHTML = `${user}<br><span style="font-size:14px; color:var(--sub);">${myCurrent.username}</span>`;
+                }
             });
 
             onValue(ref(db, 'channels'), s => {
@@ -639,15 +1068,16 @@
                 }
                 s.forEach(c => {
                     const partner = c.key;
+                    const pData = allUsers.find(u => u.name === partner);
+                    if (!pData) return;
                     const row = document.createElement('div');
                     row.className = 'item-row';
-                    const pData = allUsers.find(u => u.name === partner);
-                    const pColor = pData ? pData.color : 'var(--accent)';
+                    const pColor = pData ? (pData.avatarColor || pData.color) : 'var(--accent)';
                     const pAvatar = pData && pData.avatar ? pData.avatar : null;
                     row.innerHTML = `
                         <div class="avatar" style="background: ${pColor}; background-image: ${pAvatar ? `url(${pAvatar})` : 'none'}; background-size: cover;">${pAvatar ? '' : partner[0].toUpperCase()}</div>
                         <div class="item-info">
-                            <div class="item-name">${partner}</div>
+                            <div class="item-name">${partner} ${(pData && (pData.name === ADMIN || pData.name === SUPPORT_NAME)) ? '<i class="fas fa-check-circle verified-badge" style="font-size:12px;"></i>' : ''}</div>
                             <div class="item-last">Нажмите, чтобы открыть</div>
                         </div>
                     `;
@@ -655,6 +1085,11 @@
                     list.appendChild(row);
                 });
             });
+
+            // Загружаем рынок при входе
+            refreshMarketplace();
+            // Ферма: обработчик клика
+            document.getElementById('tap-area').addEventListener('click', handleTap);
         }
 
         window.deleteChannel = (name) => {
@@ -712,7 +1147,7 @@
         }
         initSwipe();
 
-        // --- АВАТАР ---
+        // --- АВАТАР (фото) ---
         window.uploadAvatar = async (input) => {
             const file = input.files[0];
             if (!file) return;
@@ -728,7 +1163,35 @@
             reader.readAsDataURL(file);
         };
 
-        // --- ОТКРЫТИЕ ЧАТА (с поддержкой отображения аватара техподдержки) ---
+        // --- Смена цвета аватарки ---
+        window.saveAvatarColor = async (v) => {
+            if (user === ADMIN || user === SUPPORT_NAME) return;
+            userAvatarColor = v;
+            localStorage.setItem('flux_avatar_color', v);
+            document.getElementById('avatar-color-preview').style.background = v;
+            document.getElementById('my-avatar').style.background = v;
+            if(user) await update(ref(db, 'users/' + user), { avatarColor: v });
+        };
+
+        // --- Смена @username ---
+        window.changeUsername = async () => {
+            const newUsername = prompt("Введите новый @юзернейм (начинается с @, только латиница и цифры, без пробелов):", 
+                allUsers.find(u => u.name === user)?.username || '@');
+            if (!newUsername) return;
+            if (!newUsername.startsWith('@')) {
+                alert("Юзернейм должен начинаться с @");
+                return;
+            }
+            const existing = allUsers.find(u => u.username === newUsername && u.name !== user);
+            if (existing) {
+                alert("Этот юзернейм уже занят!");
+                return;
+            }
+            await update(ref(db, 'users/' + user), { username: newUsername });
+            alert("Юзернейм изменён!");
+        };
+
+        // --- ОТКРЫТИЕ ЧАТА ---
         window.openChat = (name, isChannel = false) => {
             const panel = document.getElementById('chat-win');
             panel.classList.add('open');
@@ -745,11 +1208,10 @@
                     avatar.style.backgroundImage = '';
                     avatar.innerText = name[0].toUpperCase();
                 }
-                // Если это техподдержка, меняем фон на оранжевый
-                if (name === SUPPORT_NAME) {
+                if (name === SUPPORT_NAME || name === ADMIN) {
                     avatar.style.background = '#FF9500';
                 } else {
-                    avatar.style.background = pData?.color || 'var(--accent)';
+                    avatar.style.background = pData?.avatarColor || pData?.color || 'var(--accent)';
                 }
             } else {
                 avatar.style.backgroundImage = '';
@@ -879,6 +1341,11 @@
                         continue;
                     }
                     
+                    const timeSpan = document.createElement('div');
+                    timeSpan.className = 'message-time';
+                    timeSpan.innerText = formatTime(m.time);
+                    bubbleDiv.appendChild(timeSpan);
+                    
                     wrap.appendChild(bubbleDiv);
                     
                     wrap.onclick = () => {
@@ -909,7 +1376,6 @@
                 i.value = ''; 
                 i.focus();
                 
-                // Если это чат с техподдержкой и сообщение не от поддержки, обрабатываем
                 if (roomPath.includes(SUPPORT_NAME) && user !== SUPPORT_NAME) {
                     processSupportMessage(txt, user, roomPath);
                 }
@@ -941,8 +1407,14 @@
         };
 
         window.openProfile = (targetName) => {
-            document.getElementById('p-name').innerText = targetName;
+            currentProfileUser = targetName;
             const pData = allUsers.find(u => u.name === targetName);
+            document.getElementById('p-name').innerHTML = targetName + ((pData && (pData.name === ADMIN || pData.name === SUPPORT_NAME)) ? ' <i class="fas fa-check-circle verified-badge"></i>' : '');
+            if(pData && pData.username) {
+                document.getElementById('p-username').innerText = pData.username;
+            } else {
+                document.getElementById('p-username').innerText = '@' + targetName;
+            }
             if(pData && pData.avatar) {
                 document.getElementById('p-avatar').style.backgroundImage = `url(${pData.avatar})`;
                 document.getElementById('p-avatar').innerText = '';
@@ -950,8 +1422,8 @@
                 document.getElementById('p-avatar').style.backgroundImage = '';
                 document.getElementById('p-avatar').innerText = targetName[0].toUpperCase();
             }
-            if(pData && pData.color) {
-                document.getElementById('p-avatar').style.background = pData.color;
+            if(pData && pData.avatarColor) {
+                document.getElementById('p-avatar').style.background = pData.avatarColor;
             } else {
                 document.getElementById('p-avatar').style.background = 'var(--accent)';
             }
@@ -966,6 +1438,13 @@
                     setTimeout(() => openChat(targetName, false), 300);
                 };
             }
+            const delBtn = document.getElementById('p-delete-btn');
+            if (user === ADMIN && targetName !== ADMIN && targetName !== SUPPORT_NAME) {
+                delBtn.style.display = 'flex';
+                delBtn.onclick = () => deleteUser(targetName);
+            } else {
+                delBtn.style.display = 'none';
+            }
             document.getElementById('prof-win').classList.add('open');
         };
 
@@ -975,12 +1454,16 @@
             list.innerHTML = '';
             allUsers.forEach(d => {
                 if(d.name === user) return;
-                if(d.name.toLowerCase().includes(q)) {
+                if(d.name.toLowerCase().includes(q) || (d.username && d.username.toLowerCase().includes(q))) {
                     const row = document.createElement('div');
                     row.className = 'item-row';
+                    const bgColor = d.avatarColor || d.color || 'var(--accent)';
                     row.innerHTML = `
-                        <div class="avatar" style="background: ${d.color || 'var(--accent)'}; background-image: ${d.avatar ? `url(${d.avatar})` : 'none'}; background-size: cover;">${d.avatar ? '' : d.name[0].toUpperCase()}</div>
-                        <div class="item-info"><div class="item-name">${d.name}</div></div>
+                        <div class="avatar" style="background: ${bgColor}; background-image: ${d.avatar ? `url(${d.avatar})` : 'none'}; background-size: cover;">${d.avatar ? '' : d.name[0].toUpperCase()}</div>
+                        <div class="item-info">
+                            <div class="item-name">${d.name} ${(d.name === ADMIN || d.name === SUPPORT_NAME) ? '<i class="fas fa-check-circle verified-badge"></i>' : ''}</div>
+                            <div class="item-last">${d.username || ''}</div>
+                        </div>
                     `;
                     row.onclick = () => openProfile(d.name);
                     list.appendChild(row);
@@ -1012,6 +1495,7 @@
             const newN = prompt("Введи новый ник (макс 15 символов):", user);
             if(newN && newN !== user && newN.trim().length > 0 && newN.length <= 15) {
                 const s = await get(ref(db, 'users/' + user));
+                const oldUsername = s.val().username;
                 await set(ref(db, 'users/' + newN.trim()), { ...s.val(), name: newN.trim() });
                 const chats = await get(ref(db, 'user_chats/' + user));
                 if(chats.exists()) {
