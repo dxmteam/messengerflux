@@ -437,7 +437,7 @@
         <div class="input-area">
             <label class="input-btn"><i class="fa-solid fa-paperclip"></i><input type="file" id="photo-input" hidden accept="image/*" onchange="sendPhoto(this)"></label>
             <input type="text" id="m-in" placeholder="Сообщение..." onkeypress="if(event.key === 'Enter') sendMsg()">
-            <i id="mic-btn" class="fa-solid fa-microphone input-btn" onclick="startRecording()"></i>
+            <i id="mic-btn" class="fa-solid fa-microphone input-btn" style="touch-action: manipulation;"></i>
             <button class="send-btn" onclick="sendMsg()"><i class="fa-solid fa-arrow-up"></i></button>
         </div>
     </div>
@@ -518,12 +518,16 @@
         let recordingTimerInterval = null;
         let recordedBlob = null;
         let recordedDuration = 0;
+        let micPermissionGranted = false;
+        let recordingInProgress = false;
+        let savedStream = null;      // сохранённый поток
 
         // Переменные для свайпа
         let startX = 0;
         let currentTranslate = 0;
         let isDragging = false;
         const chatPanel = document.getElementById('chat-win');
+        const micBtn = document.getElementById('mic-btn');
 
         // Инициализация темы
         if(localStorage.getItem('flux_theme') === 'light') {
@@ -542,6 +546,30 @@
             if (!timestamp) return '';
             const date = new Date(timestamp);
             return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Запрос разрешения на микрофон один раз (стерео)
+        async function requestMicrophonePermission() {
+            try {
+                savedStream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        channelCount: { ideal: 2 },
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false
+                    }
+                });
+                micPermissionGranted = true;
+                micBtn.style.opacity = "1";
+                micBtn.style.pointerEvents = "auto";
+                attachMicEvents();
+            } catch (err) {
+                console.error("Микрофон отклонён:", err);
+                micPermissionGranted = false;
+                micBtn.style.opacity = "0.5";
+                micBtn.style.pointerEvents = "none";
+                alert("Для записи голосовых сообщений нужно разрешить доступ к микрофону. Перезагрузите страницу и разрешите доступ.");
+            }
         }
 
         // --- Создание пользователя техподдержки, если его нет ---
@@ -603,13 +631,11 @@
                 alert("Цена должна быть положительным числом");
                 return;
             }
-            // Проверка, что юзернейм не занят
             const existingUser = allUsers.find(u => u.username === username);
             if (existingUser) {
                 alert("Этот юзернейм уже занят");
                 return;
             }
-            // Проверка, что не выставлен на продажу
             const listingRef = ref(db, `marketplace/${username}`);
             const listingSnap = await get(listingRef);
             if (listingSnap.exists()) {
@@ -624,7 +650,7 @@
             alert("Юзернейм выставлен на продажу!");
             document.getElementById('sell-username').value = '';
             document.getElementById('sell-price').value = '';
-            refreshMarketplace(); // обновляем список сразу
+            refreshMarketplace();
         };
 
         function escapeHtml(str) {
@@ -674,7 +700,6 @@
             }
         };
 
-        // Проверка цены для покупки по имени
         window.checkUsernamePrice = async () => {
             const username = document.getElementById('buy-username').value.trim();
             const priceInfo = document.getElementById('buy-price-info');
@@ -711,7 +736,6 @@
             const seller = btn.getAttribute('data-seller');
             if (!username || !price || !seller) return;
             await buyUsername(username, price, seller);
-            // Скрыть кнопку после покупки
             btn.style.display = 'none';
             document.getElementById('buy-price-info').innerText = '';
             document.getElementById('buy-username').value = '';
@@ -729,7 +753,6 @@
                 alert("Недостаточно монет!");
                 return;
             }
-            // Проверяем, что юзернейм всё ещё свободен
             const existingUser = allUsers.find(u => u.username === username);
             if (existingUser) {
                 alert("Юзернейм уже занят");
@@ -737,7 +760,6 @@
                 refreshMarketplace();
                 return;
             }
-            // Проверяем, что объявление ещё существует
             const listingRef = ref(db, `marketplace/${username}`);
             const listingSnap = await get(listingRef);
             if (!listingSnap.exists()) {
@@ -745,18 +767,16 @@
                 refreshMarketplace();
                 return;
             }
-            // Выполняем транзакцию
             const sellerRef = ref(db, 'users/' + seller);
             const sellerSnap = await get(sellerRef);
             const sellerCoins = sellerSnap.val().coins || 0;
-            const profit = Math.floor(price * 1.5); // +50% прибыли
+            const profit = Math.floor(price * 1.5);
             await update(buyerRef, { coins: buyerCoins - price, username: username });
             await update(sellerRef, { coins: sellerCoins + profit });
             await remove(listingRef);
             alert(`Поздравляем! Вы купили юзернейм ${username}. Продавец получил ${profit} монет.`);
             updateCoinsDisplay();
             refreshMarketplace();
-            // Обновляем список пользователей и контакты
             const usersRef = ref(db, 'users');
             const usersSnap = await get(usersRef);
             allUsers = [];
@@ -832,78 +852,84 @@
             }
         }
 
-        // --- ГОЛОСОВЫЕ СООБЩЕНИЯ ---
-        window.startRecording = async () => {
+        // --- ГОЛОСОВЫЕ СООБЩЕНИЯ С ЗАЖАТИЕМ ---
+        async function startRecording() {
             if (!chatRef) {
                 alert("Сначала откройте чат!");
-                return;
+                return false;
             }
-            if (mediaRecorder && mediaRecorder.state === "recording") {
-                stopRecordingAndShowPreview();
-                return;
+            if (!micPermissionGranted || !savedStream) {
+                alert("Нет доступа к микрофону. Перезагрузите страницу и разрешите доступ.");
+                return false;
             }
+            if (recordingInProgress) return false;
+            
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                mediaRecorder = new MediaRecorder(savedStream, { mimeType: 'audio/webm' });
                 audioChunks = [];
                 mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
                 mediaRecorder.onstop = () => {
+                    recordingInProgress = false;
                     recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
                     const audio = new Audio();
                     audio.src = URL.createObjectURL(recordedBlob);
                     audio.onloadedmetadata = () => {
                         recordedDuration = audio.duration * 1000;
                         URL.revokeObjectURL(audio.src);
+                        if (recordedDuration < 500) {
+                            cancelRecording();
+                            alert("Запись слишком короткая (менее 0.5 сек). Отменено.");
+                        } else {
+                            sendRecording();
+                        }
                     };
-                    document.getElementById('recording-panel').classList.add('active');
-                    document.getElementById('mic-btn').style.color = "var(--sub)";
-                    document.getElementById('mic-btn').classList.remove('fa-beat-fade');
-                    document.getElementById('m-in').disabled = false;
-                    document.getElementById('m-in').placeholder = "Сообщение...";
-                    if (recordingTimerInterval) clearInterval(recordingTimerInterval);
-                    stream.getTracks().forEach(track => track.stop());
                 };
                 mediaRecorder.start();
                 recordingStartTime = Date.now();
                 recordingTimerInterval = setInterval(updateRecordingTimer, 200);
-                document.getElementById('mic-btn').style.color = "#ff3b30";
-                document.getElementById('mic-btn').classList.add('fa-beat-fade');
+                micBtn.style.color = "#ff3b30";
+                micBtn.classList.add('fa-beat-fade');
                 document.getElementById('m-in').disabled = true;
-                document.getElementById('m-in').placeholder = "Идёт запись...";
+                document.getElementById('m-in').placeholder = "Запись... отпустите для отправки";
+                recordingInProgress = true;
+                return true;
             } catch(err) {
                 console.error(err);
-                alert("Не удалось получить доступ к микрофону. Проверьте разрешения.");
+                alert("Ошибка при записи");
+                return false;
             }
-        };
-
-        function updateRecordingTimer() {
-            const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
-            const minutes = Math.floor(elapsed / 60);
-            const seconds = elapsed % 60;
-            document.getElementById('rec-timer').innerText = `${minutes}:${seconds.toString().padStart(2,'0')}`;
         }
 
-        function stopRecordingAndShowPreview() {
+        function stopRecordingAndSend() {
             if (mediaRecorder && mediaRecorder.state === "recording") {
                 mediaRecorder.stop();
+            } else if (recordingInProgress) {
+                if (mediaRecorder) mediaRecorder.stop();
             }
         }
 
-        window.cancelRecording = () => {
+        function cancelRecording() {
             if (mediaRecorder && mediaRecorder.state === "recording") {
                 mediaRecorder.stop();
             }
             recordedBlob = null;
             recordedDuration = 0;
-            document.getElementById('recording-panel').classList.remove('active');
-            document.getElementById('mic-btn').style.color = "var(--sub)";
-            document.getElementById('mic-btn').classList.remove('fa-beat-fade');
+            micBtn.style.color = "var(--sub)";
+            micBtn.classList.remove('fa-beat-fade');
             document.getElementById('m-in').disabled = false;
             document.getElementById('m-in').placeholder = "Сообщение...";
             if (recordingTimerInterval) clearInterval(recordingTimerInterval);
-        };
+            recordingInProgress = false;
+        }
 
-        window.sendRecording = () => {
+        function updateRecordingTimer() {
+            const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            micBtn.setAttribute('data-timer', `${minutes}:${seconds.toString().padStart(2,'0')}`);
+        }
+
+        function sendRecording() {
             if (!recordedBlob || !chatRef) return;
             const reader = new FileReader();
             reader.onload = () => {
@@ -912,7 +938,41 @@
                 cancelRecording();
             };
             reader.readAsDataURL(recordedBlob);
-        };
+        }
+
+        // Обработчики событий нажатия/отпускания для кнопки микрофона
+        function attachMicEvents() {
+            micBtn.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                startRecording();
+            });
+            micBtn.addEventListener('mouseup', (e) => {
+                e.preventDefault();
+                if (recordingInProgress) {
+                    stopRecordingAndSend();
+                }
+            });
+            micBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                startRecording();
+            });
+            micBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                if (recordingInProgress) {
+                    stopRecordingAndSend();
+                }
+            });
+            micBtn.addEventListener('mouseleave', () => {
+                if (recordingInProgress) {
+                    cancelRecording();
+                }
+            });
+            micBtn.addEventListener('touchcancel', () => {
+                if (recordingInProgress) {
+                    cancelRecording();
+                }
+            });
+        }
 
         // --- АВТОРИЗАЦИЯ ---
         window.auth = async () => {
@@ -1086,17 +1146,17 @@
                 });
             });
 
-            // Загружаем рынок при входе
             refreshMarketplace();
-            // Ферма: обработчик клика
             document.getElementById('tap-area').addEventListener('click', handleTap);
+            
+            // Запрашиваем разрешение микрофона один раз
+            requestMicrophonePermission();
         }
 
         window.deleteChannel = (name) => {
             if(confirm(`Удалить канал ${name}?`)) remove(ref(db, `channels/${name}`));
         };
 
-        // --- МОДАЛЬНОЕ ОКНО ДЛЯ СОЗДАНИЯ КАНАЛА ---
         window.showCreateChannelModal = () => {
             document.getElementById('channel-modal').classList.add('show');
             document.getElementById('channel-name-input').value = '';
@@ -1163,7 +1223,6 @@
             reader.readAsDataURL(file);
         };
 
-        // --- Смена цвета аватарки ---
         window.saveAvatarColor = async (v) => {
             if (user === ADMIN || user === SUPPORT_NAME) return;
             userAvatarColor = v;
@@ -1173,7 +1232,6 @@
             if(user) await update(ref(db, 'users/' + user), { avatarColor: v });
         };
 
-        // --- Смена @username ---
         window.changeUsername = async () => {
             const newUsername = prompt("Введите новый @юзернейм (начинается с @, только латиница и цифры, без пробелов):", 
                 allUsers.find(u => u.name === user)?.username || '@');
@@ -1191,7 +1249,7 @@
             alert("Юзернейм изменён!");
         };
 
-        // --- ОТКРЫТИЕ ЧАТА ---
+        // --- ОТКРЫТИЕ ЧАТА (оригинальная версия без спиннеров) ---
         window.openChat = (name, isChannel = false) => {
             const panel = document.getElementById('chat-win');
             panel.classList.add('open');
@@ -1366,7 +1424,6 @@
             });
         };
 
-        // --- ОТПРАВКА СООБЩЕНИЙ С ПОДДЕРЖКОЙ ---
         window.sendMsg = () => {
             const i = document.getElementById('m-in');
             const txt = i.value.trim();
